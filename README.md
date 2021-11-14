@@ -1,4 +1,4 @@
-**Private fork** of mpv-video-splice with the added functionality to write timecodes to an SRT-compatible subtitle file in chronological order. The keybinding to write the SRT file is Alt + W.
+**Private fork** of mpv-video-splice with the added functionality to write timecodes to an SRT-compatible subtitle file in chronological order. The key binding to write the SRT file is Alt + W.
 
 **No maintenance.**
 
