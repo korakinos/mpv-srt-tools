@@ -166,7 +166,7 @@ local function get_time()
 	local mins = math.floor((time_in_secs - hours * 3600) / 60)
 	local secs = time_in_secs - hours * 3600 - mins * 60
 
-	local fmt_time = string.format('%02d:%02d:%05.2f', hours, mins, secs)
+	local fmt_time = string.format('%02d:%02d:%06.3f', hours, mins, secs)
 
 	return fmt_time
 end
@@ -201,6 +201,30 @@ function show_times()
 	if start_time then
 		notify(2000, "Slice ", #times+1, " in progress.")
 	end
+end
+
+function write_srt()
+	notify(2000, "Writing cut times to SRT file.")
+
+	-- backup an existing output file
+	os.rename("subtitles-template.srt", "subtitles-template-backup-" .. os.date("%FT%T") .. ".srt")
+
+	-- copy the times table before sorting, so the global one remains unchanged
+	times_sorted = times
+	table.sort(times_sorted, function (left, right)
+		return left.t_start < right.t_start
+	end)
+
+	srt_file = io.open("subtitles-template.srt", "w+")
+	for i, obj in ipairs(times_sorted) do
+		srt_file:write(i, "\n")
+		t_start = string.gsub(obj.t_start, "%.", ",")
+		t_end = string.gsub(obj.t_end, "%.", ",")
+		srt_file:write(t_start, " --> ", t_end, "\n")
+		srt_file:write("{}", "\n")
+		srt_file:write("\n")
+	end
+	srt_file:flush()
 end
 
 function reset_current_slice()
@@ -325,6 +349,7 @@ end)
 
 mp.add_key_binding('Alt+t', "put_time", put_time)
 mp.add_key_binding('Alt+p', "show_times", show_times)
+mp.add_key_binding('Alt+w', "write_srt", write_srt)
 mp.add_key_binding('Alt+c', "process_video", process_video)
 mp.add_key_binding('Alt+r', "reset_current_slice", reset_current_slice)
 mp.add_key_binding('Alt+d', "delete_slice", delete_slice)
