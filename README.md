@@ -1,7 +1,7 @@
 # mpv-srt-tools
 
 Small set of tools to generate SRT subtitles for videos:
- * mpv-timecode-to-srt.lua: Lua for mpv script that allows to mark timecodes in a playing video and write a template SRT file using keybindings in mpv.
+ * mpv-timecode-to-srt.lua: Lua script for mpv that allows to mark timecodes in a playing video and write a template SRT file using keybindings in mpv.
  * merge-subtitles.py: Python script to merge the generated template SRT file with a plaintext file of subtitles.
  * run-mpv.sh: convenience shell script to run mpv with the lua script and the merged subtitles (if present) loaded.
 
@@ -70,7 +70,7 @@ Example 2: Deleting slice number 76
 
 #### Alt + W (Write SRT template file)
 
-Pressing Alt + W writes the stored timecodes out to an SRT file "subtitles-template.srt", sorted by the start of each timecode pair. (Any preexisting file of that name is backed up by renaming.) The file will look something like this:
+Pressing `Alt + W` writes the stored timecodes out to an SRT file "subtitles-template.srt", sorted by the start of each timecode pair. (Any preexisting file of that name is backed up by renaming.) The file will look something like this:
 
 ```srt
 1
@@ -116,7 +116,7 @@ And so on.
 ```
 Naturally, the number of paragraphs in the txt file should be equal to the number of subtitles in the srt file.
  
-Place `subtitles.txt` in the same directory as the python script as well as `subtitles-template.srt`, then invoke the python script from the command line: 'python3 merge-subtitles.py`.
+Place `subtitles.txt` in the same directory as the python script as well as `subtitles-template.srt`, then invoke the python script from the command line: `python3 merge-subtitles.py`.
 
 The merged subtitle file will be written to "subtitles.srt". Any preexisting file of that name will be backed up by renaming it with a timecode.
 
