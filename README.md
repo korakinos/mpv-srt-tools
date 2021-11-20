@@ -1,28 +1,23 @@
-**Private fork** of mpv-video-splice with the added functionality to write timecodes to an SRT-compatible subtitle file in chronological order. The key binding to write the SRT file is Alt + W.
+# mpv-srt-tools
 
-**No maintenance.**
+Small set of tools to generate SRT subtitles for videos:
+ * mpv-timecode-to-srt.lua: Lua for mpv script that allows to mark timecodes in a playing video and write a template SRT file using keybindings in mpv.
+ * merge-subtitles.py: Python script to merge the generated template SRT file with a plaintext file of subtitles.
+ * run-mpv.sh: convenience shell script to run mpv with the lua script and the merged subtitles (if present) loaded.
+
+The Lua mpv script is heavily based on https://github.com/pvpscript/mpv-video-splice/ .
+Apart from the added functionality to generate SRT files, the time format was changed slightly (one more decimal digit of precision) and the video editing component was taken out, so that it cannot be triggered by accident.
 
 
-# mpv-video-splice
-An mpv player script that helps you create a video out of cuts made in the current playing video.
-
-**Requires: ffmpeg**
-
-## Description
-This script provides the hability to create video slices by grabbing two
+## MPV Lua script
+The Lua script provides the hability to create video slices by grabbing two
 timestamps, which generate a slice from timestamp A to timestamp B,
 e.g.:
 	
-	-> Slice 1: 00:10:34.25 -> 00:15:00.00;
-	-> Slice 2: 00:23:00.84 -> 00:24:10.00;
+	-> Slice 1 :  00:10:34.250  ->  00:15:00.000
+	-> Slice 2 :  00:23:00.840  ->  00:24:10.000
 	...
-	-> Slice n: 01:44:22.47 -> 01:56:00.00;
-	
-
-Then, all the slices from 1 to n are joined together, creating a new
-video.
-
-**The output file will appear at the directory that the mpv command was ran.**
+	-> Slice n :  01:44:22.470  ->  01:56:00.000
 
 **Note:** This script prevents the mpv player from closing when the video ends,
 so that the slices don't get lost. Keep this in mind if there's the option
@@ -32,26 +27,29 @@ so that the slices don't get lost. Keep this in mind if there's the option
 can be seen more clearly.
 
 
-## Usage
+### Usage and key bindings of the mpv Lua script
+
+Run as `mpv --scripts=<path-to-script/mpv-timecodes-to-srt.lua <video file>` from the command line.
+
 This section correspond to the shortcut keys provided by this script.
 
-### Alt + T (Grab timestamp)
+#### Alt + T (Grab timestamp)
 In the video screen, press `Alt + T` to grab the first timestamp and then
 press `Alt + T` again to get the second timestamp. This process will generate
 a time range, which represents a video slice. Repeat this process to create
 more slices.
 
-### Alt + P (Print slices)
+#### Alt + P (Print slices)
 To see all the slices made, press `Alt + P`. All of the slices will appear
 in the terminal in order of creation, with their corresponding timestamps.
 Incomplete slices will show up as `Slice N in progress`, where N is the
 slice number.
 
-### Alt + R (Reset unfinished slice)
+#### Alt + R (Reset unfinished slice)
 To reset an incomplete slice, press `Alt + R`. If the first part of a slice
 was created at the wrong time, this will reset the current slice.
 
-### Alt + D (Delete slice)
+#### Alt + D (Delete slice)
 To delete a whole slice, start the slice deletion mode by pressing `Alt + D`.
 When in this mode, it's possible to press `Alt + NUM`, where `NUM` is any
 number between 0 inclusive and 9 inclusive. For each `Alt + NUM` pressed, a
@@ -70,15 +68,27 @@ Example 2: Deleting slice number 76
 * `Alt + 6`	# Concatenate number 6
 * `Alt + D`	# Exit slice deletion mode
 
-### Alt + C (Compiling final video)
-To fire up ffmpeg, which will slice up the video and concatenate the slices
-together, press `Alt + C`. It's important that there are at least one
-slice, otherwise no video will be created.
+#### Alt + W (Write SRT template file)
 
-**Note:** No cut will be made unless the user presses `Alt + C`.
-Also, the original video file **won't** be affected by the cutting.
+Pressing Alt + W writes the stored timecodes out to an SRT file "subtitles-template.srt", sorted by the start of each timecode pair. (Any preexisting file of that name is backed up by renaming.) The file will look something like this:
 
-## Log Level
+```srt
+1
+00:00:00,367 --> 00:00:00,600
+{}
+
+2
+00:00:00,933 --> 00:00:01,800
+{}
+
+3
+00:00:03,533 --> 00:00:03,767
+{}
+```
+
+The braces ("{}") are placeholders for the actual subtitles.
+
+### Log Level
 Everytime a timestamp is grabbed, a text will appear on the screen showing
 the selected time.
 When `Alt + P` is pressed, besides showing the slices in the terminal, 
@@ -92,27 +102,28 @@ that the process ended.
 
 **Note:** Every message that appears on the terminal has the **log level of 'info'**.
 
-## Environment Variables
-This script uses environment variables to allow the user to
-set the temporary location of the video cuts and for setting the location for
-the resulting video.
 
-To set the temporary directory, set the variable `MPV_SPLICE_TEMP`;
+## Python script for merging your subtitles into the SRT template 
 
-e.g.: `export MPV_SPLICE_TEMP="$HOME/temporary_location"`
+Prepare your subtitles as a plaintext file named "subtitles.txt", with each subtitle as a separate paragraph, ordered by their intended appearance in the video:
 
-To set the video output directory, set the variable `MPV_SPLICE_OUTPUT`;
+```txt
+This is the first subtitle.
 
-e.g.: `export MPV_SPLICE_OUTPUT="$HOME/output_location"`
+This is the <i>second</i> one, which will be associated with the <i>second</i> time code.
 
-**Make sure the directories set in the variables really exist, or else the
-script might fail.**
+And so on.
+```
+Naturally, the number of paragraphs in the txt file should be equal to the number of subtitles in the srt file.
+ 
+Place `subtitles.txt` in the same directory as the python script as well as `subtitles-template.srt`, then invoke the python script from the command line: 'python3 merge-subtitles.py`.
+
+The merged subtitle file will be written to "subtitles.srt". Any preexisting file of that name will be backed up by renaming it with a timecode.
 
 
+## Installation
 
-# Installation
-
-To install this script, simply add it to your script folder, located at
+To install the mpv Lua script, simply add it to your script folder, located at
 `$HOME/.config/mpv/scripts`
 
 When the mpv player gets started up, the script will be executed and will be ready to use.
