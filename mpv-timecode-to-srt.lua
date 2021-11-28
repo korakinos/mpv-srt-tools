@@ -1,9 +1,7 @@
 -- -----------------------------------------------------------------------------
 --
--- MPV Splice
--- URL: https://github.com/pvpscript/mpv-video-splice
---
--- Requires: ffmpeg
+-- MPV SRT Tool
+-- URL: https://github.com/korakinos/mpv-srt-tools
 --
 -- Description:
 --
@@ -35,9 +33,8 @@
 --
 -- In the video screen, press Alt + T to grab the first timestamp and then
 -- press Alt + T again to get the second timestamp. This process will generate
--- a time range, which represents a video slice. Repeat this process to create
--- more slices.
---
+-- a time range, or a "slice".
+-- 
 -- To see all the slices made, press Alt + P. All of the slices will appear
 -- in the terminal in order of creation, with their corresponding timestamps.
 -- Incomplete slices will show up as 'Slice N in progress', where N is the
@@ -64,12 +61,6 @@
 -- 	-> Alt + 6	# Concatenate number 6
 -- 	-> Alt + D	# Exit slice deletion mode
 --
--- To fire up ffmpeg, which will slice up the video and concatenate the slices
--- together, press Alt + C. It's important that there are at least one
--- slice, otherwise no video will be created.
---
--- Note: No cut will be made unless the user presses Alt + C.
--- Also, the original video file won't be affected by the cutting.
 --
 --
 -- -----------------------------------------------------------------------------
@@ -80,8 +71,7 @@
 -- Everytime a timestamp is grabbed, a text will appear on the screen showing
 -- the selected time.
 -- When Alt + P is pressed, besides showing the slices in the terminal,
--- it will also show on the screen the total number of cuts (or slices)
--- that were made.
+-- it will also show on the screen the total number of slices that were made.
 -- When the actual cutting and joining process begins, a message will be shown
 -- on the screen and the terminal telling that it began. When the process ends,
 -- a message will appear on the screen and the terminal displaying the full path
@@ -90,24 +80,6 @@
 --
 -- Note: Every message that appears on the terminal has the log level of 'info'.
 --
---
--- -----------------------------------------------------------------------------
---
---
--- Environment Variables:
---
--- This script uses environment variables to allow the user to
--- set the temporary location of the video cuts and for setting the location for
--- the resulting video.
---
--- To set the temporary directory, set the variable MPV_SPLICE_TEMP;
--- e.g.: export MPV_SPLICE_TEMP="$HOME/temporary_location"
---
--- To set the video output directory, set the variable MPV_SPLICE_OUTPUT;
--- e.g.: export MPV_SPLICE_OUTPUT="$HOME/output_location"
---
--- Make sure the directories set in the variables really exist, or else the
--- script might fail.
 --
 -- -----------------------------------------------------------------------------
 
