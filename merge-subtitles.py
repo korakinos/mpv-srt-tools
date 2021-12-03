@@ -26,6 +26,6 @@ except FileNotFoundError:
 
 # merge SRT template with text paragraphs, write SRT file
 with open("subtitles-template.srt") as template_file,
-    with open("subtitles.srt", "w") as merged_file:
-        srt_data = template_file.read()
-        merged_file.write(srt_data.format(*paragraphs))
+with open("subtitles.srt", "w") as merged_file:
+    srt_data = template_file.read()
+    merged_file.write(srt_data.format(*paragraphs))
