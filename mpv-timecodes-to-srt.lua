@@ -15,22 +15,9 @@ local opt = require 'mp.options'
 --------------------------------------------------------------------------------
 -- Default variables
 
-local SCRIPT_NAME = "mpv-splice"
-local default_tmp_location = "~/tmpXXX"
-local default_output_location = mp.get_property("working-directory")
+local SCRIPT_NAME = "mpv-timecodes-to-srt"
 
 --------------------------------------------------------------------------------
-
-local splice_options = {
-	tmp_location = os.getenv("MPV_SPLICE_TEMP") and os.getenv("MPV_SPLICE_TEMP") or default_tmp_location,
-	output_location = os.getenv("MPV_SPLICE_OUTPUT") and os.getenv("MPV_SPLICE_OUTPUT") or default_output_location
-}
-opt.read_options(splice_options, SCRIPT_NAME)
-
-
-local concat_name = "concat.txt"
-
-local ffmpeg = "ffmpeg -hide_banner -loglevel warning"
 
 local times = {}
 local start_time = nil
@@ -174,63 +161,6 @@ function prevent_quit(name)
 	end
 end
 
-function process_video()
-	local alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	local rnd_size = 10
-
-	local pieces = {}
-
-	-- Better seed randomization
-	math.randomseed(os.time())
-	math.random(); math.random(); math.random()
-
-	if times[#times] then
-		local tmp_dir = io.popen(string.format("mktemp -d %s",
-			splice_options.tmp_location)):read("*l")
-		local input_file = mp.get_property("path")
-		local ext = string.gmatch(input_file, ".*%.(.*)$")()
-
-		local rnd_str = ""
-		for i=1,rnd_size,1 do
-			local rnd_index = math.floor(math.random() * #alphabet + 0.5)
-			rnd_str = rnd_str .. alphabet:sub(rnd_index, rnd_index)
-		end
-
-		local output_file = string.format("%s/%s_%s_cut.%s",
-			splice_options.output_location,
-			mp.get_property("filename/no-ext"),
-			rnd_str, ext)
-
-		local cat_file_name = string.format("%s/%s", tmp_dir, "concat.txt")
-		local cat_file_ptr = io.open(cat_file_name, "w")
-
-		notify(2000, "Process started!")
-
-		for i, obj in ipairs(times) do
-			local path = string.format("%s/%s_%d.%s",
-				tmp_dir, rnd_str, i, ext)
-			cat_file_ptr:write(string.format("file '%s'\n", path))
-			os.execute(string.format("%s -ss %s -i \"%s\" -to %s " ..
-				"-c copy -copyts -avoid_negative_ts make_zero \"%s\"",
-				ffmpeg, obj.t_start, input_file, obj.t_end,
-				path))
-		end
-
-		cat_file_ptr:close()
-
-		cmd = string.format("%s -f concat -safe 0 -i \"%s\" " ..
-			"-c copy \"%s\"",
-			ffmpeg, cat_file_name, output_file)
-		os.execute(cmd)
-
-		notify(10000, "File saved as: ", output_file)
-		msg.info("Process ended!")
-
-		os.execute(string.format("rm -rf %s", tmp_dir))
-		msg.info("Temporary directory removed!")
-	end
-end
-
 mp.set_property("keep-open", "yes") -- Prevent mpv from exiting when the video ends
 mp.set_property("quiet", "yes") -- Silence terminal.
 
@@ -244,6 +174,5 @@ end)
 mp.add_key_binding('Alt+t', "put_time", put_time)
 mp.add_key_binding('Alt+p', "show_times", show_times)
 mp.add_key_binding('Alt+w', "write_srt", write_srt)
-mp.add_key_binding('Alt+c', "process_video", process_video)
 mp.add_key_binding('Alt+r', "reset_current_slice", reset_current_slice)
 mp.add_key_binding('Alt+d', "delete_slice", delete_slice)
