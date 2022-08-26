@@ -105,3 +105,9 @@ The merged subtitle file will be written to "subtitles.srt". Any preexisting fil
 To install the mpv Lua script, simply add it to your script folder, located at `$HOME/.config/mpv/scripts`
 
 When the mpv player gets started up, the script will be executed and will be ready to use.
+
+
+## Things which could be improved
+
+ - Warning messages when number of slices and subtitles don't match.
+ - Somehow allow for empty lines within subtitles. (Right now empty lines are always parsed as separators *between* subtitles.)
